@@ -28,8 +28,11 @@
  *      .catch((error) => console.log(error.message)) // 'Error: Wrong parameter is passed!
  *                                                    //  Ask her again.';
  */
-function willYouMarryMe(/* isPositiveAnswer */) {
-  throw new Error('Not implemented');
+function willYouMarryMe(isPositiveAnswer) {
+  return new Promise((resolve, reject) => {
+    if (typeof isPositiveAnswer !== 'boolean') return reject(Error('Wrong parameter is passed! Ask her again.'));
+    return resolve(isPositiveAnswer ? 'Hooray!!! She said "Yes"!' : 'Oh no, she said "No".');
+  });
 }
 
 
@@ -48,8 +51,13 @@ function willYouMarryMe(/* isPositiveAnswer */) {
  *    })
  *
  */
-function processAllPromises(/* array */) {
-  throw new Error('Not implemented');
+function processAllPromises(array) {
+  return new Promise((resolve, reject) => {
+    const result = [];
+    array.forEach((promise) => promise
+      .then((value) => result.push(value)).catch((error) => { reject(error); }));
+    return resolve(result);
+  });
 }
 
 /**
@@ -71,8 +79,23 @@ function processAllPromises(/* array */) {
  *    })
  *
  */
-function getFastestPromise(/* array */) {
-  throw new Error('Not implemented');
+
+function getFastestPromise(array) {
+  return new Promise((resolve, reject) => {
+    let minTime = Number.MAX_VALUE;
+    let minPromiseValue = null;
+    array.forEach((promise, index) => {
+      const startTime = Date.now();
+      promise.then((value) => {
+        const executionTime = Date.now() - startTime;
+        if (executionTime < minTime) {
+          minTime = executionTime;
+          minPromiseValue = value;
+        }
+        if (index === array.length - 1) resolve(minPromiseValue);
+      }).catch((error) => { reject(error); });
+    });
+  });
 }
 
 /**
@@ -92,8 +115,17 @@ function getFastestPromise(/* array */) {
  *    });
  *
  */
-function chainPromises(/* array, action */) {
-  throw new Error('Not implemented');
+function chainPromises(array, action) {
+  return new Promise((resolve, reject) => {
+    const delegatedAction = (a, b) => (a ? action(a, b) : b);
+    let result = null;
+    array.forEach((promise, index) => {
+      promise.then((value) => {
+        result = delegatedAction(result, value);
+        if (index === array.length - 1) resolve(result);
+      }).catch((error) => { reject(error); });
+    });
+  });
 }
 
 module.exports = {
